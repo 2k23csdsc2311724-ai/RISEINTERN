@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RiseIntern — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --card-bg: rgba(255,255,255,0.95);
+  --accent1: #2575fc;
+  --accent2: #6a11cb;
+  --muted: #666;
+}
+
+/* Dark animated background */
+body, html{
+  height:100%; margin:0; font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background: #131358;
+  position:relative;
+}
+
+/* Floating visible circles */
+.bg-circle{
+  position:absolute;
+  border-radius:50%;
+  opacity:0.6;
+  animation:moveCircle linear infinite;
+  z-index:0;
+}
+
+@keyframes moveCircle{
+  0%{ transform: translate(0,0); }
+  50%{ transform: translate(200px,-150px); }
+  100%{ transform: translate(0,0); }
+}
+
+/* Card */
+.login-card{
+  width:100%;
+  max-width:1050px;
+  background: var(--card-bg);
+  border-radius:16px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  box-shadow:0 18px 40px rgba(0,0,0,0.3);
+  overflow:hidden;
+  z-index:1;
+  position:relative;
+}
+
+/* Responsive grid */
+@media (max-width:880px){
+  .login-card { grid-template-columns: 1fr; max-width:760px; }
+  .left { order:2; padding:28px 24px; }
+  .right { order:1; padding:32px 22px; }
+}
+
+/* LEFT animated shapes */
+.left{
+  padding:48px; display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+
+.shape-wrap{ position:relative; width:100%; max-width:450px; height:350px; }
+
+.shape{
+  position:absolute;
+  border-radius:20%;
+  opacity:0.8;
+  animation:floatShape 5s ease-in-out infinite alternate;
+}
+
+.shape:nth-child(1){ width:100px; height:100px; background: #2575fc; top:10%; left:5%; animation-duration:4s; }
+.shape:nth-child(2){ width:80px; height:80px; background: #6a11cb; top:50%; left:20%; animation-duration:5s; }
+.shape:nth-child(3){ width:120px; height:120px; background: #ff6ec4; top:25%; left:55%; animation-duration:4.5s; }
+.shape:nth-child(4){ width:90px; height:90px; background: #23d5ab; top:60%; left:70%; animation-duration:6s; }
+
+@keyframes floatShape{
+  0%{ transform: translateY(0) rotate(0deg); }
+  50%{ transform: translateY(-30px) rotate(45deg); }
+  100%{ transform: translateY(0) rotate(-20deg); }
+}
+
+/* RIGHT login form panel */
+.right{ padding:56px; display:flex; flex-direction:column; justify-content:center; gap:8px; color:#17324d; }
+.brand{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.brand h1{ color:var(--accent1); font-size:22px; margin:0; }
+.title{ font-size:28px; color:#17324d; margin:6px 0 18px; font-weight:700; }
+.subtitle{ color:var(--muted); font-size:14px; margin-bottom:16px; }
+form{ display:flex; flex-direction:column; gap:12px; }
+input[type="email"], input[type="password"]{
+  padding:12px 14px; border-radius:10px; border:1px solid #e6e9ee; outline:none;
+  font-size:15px; color:#222; background:#fff;
+  transition: box-shadow .15s, border-color .15s;
+}
+input:focus{ box-shadow:0 6px 18px rgba(37,117,252,0.12); border-color:rgba(37,117,252,0.6); }
+
+
+/* Role dropdown styling */
+#role {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  background: #fff;
+  color: #333;
+  outline: none;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+/* On focus */
+#role:focus {
+  border-color: #6c63ff;
+  box-shadow: 0 0 6px rgba(108, 99, 255, 0.5);
+}
+
+/* Option styling */
+#role option {
+  padding: 10px;
+  background: #fff;
+  color: #333;
+}
+
+
+
+
+
+
+.btn{
+  margin-top:8px; padding:12px 14px; border-radius:10px; border:0; cursor:pointer;
+  font-weight:700; color:white;
+  background: linear-gradient(90deg,var(--accent1), var(--accent2));
+  box-shadow:0 8px 22px rgba(37,117,252,0.25);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:hover{ transform:translateY(-3px); box-shadow:0 14px 36px rgba(37,117,252,0.35); }
+
+.hint{ font-size:13px; color:var(--muted); margin-top:6px; }
+.hint a{ color:var(--accent1); text-decoration:none; font-weight:600; }
+.hint a:hover{ text-decoration:underline; }
+
+.message{ padding:10px 12px; border-radius:8px; font-size:14px; background:#eef9f6; color:#056644; display:none; margin-top:8px; }
+
+@media (max-width:520px){
+  .right{ padding:28px; }
+  .left{ padding:20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Larger and more circles -->
+<div class="bg-circle" style="width:60px;height:60px;top:5%;left:10%;animation-duration:20s;background:#2575fc;"></div>
+<div class="bg-circle" style="width:80px;height:80px;top:15%;left:70%;animation-duration:25s;background:#cb1121;"></div>
+<div class="bg-circle" style="width:50px;height:50px;top:25%;left:40%;animation-duration:18s;background:#ff6ec4;"></div>
+<div class="bg-circle" style="width:100px;height:100px;top:35%;left:80%;animation-duration:30s;background:#a0d523;"></div>
+<div class="bg-circle" style="width:70px;height:70px;top:50%;left:20%;animation-duration:22s;background:#ffd166;"></div>
+<div class="bg-circle" style="width:120px;height:120px;top:60%;left:50%;animation-duration:28s;background:#bd6717;"></div>
+<div class="bg-circle" style="width:90px;height:90px;top:70%;left:75%;animation-duration:26s;background:#0ec517;"></div>
+<div class="bg-circle" style="width:60px;height:60px;top:80%;left:30%;animation-duration:24s;background:#23d5ab;"></div>
+<div class="bg-circle" style="width:150px;height:150px;top:10%;left:50%;animation-duration:35s;background:#f0ec0f;"></div>
+<div class="bg-circle" style="width:130px;height:130px;top:75%;left:15%;animation-duration:32s;background:#11cb58;"></div>
+
+<div class="login-card" role="main" aria-labelledby="loginTitle">
+
+  <!-- LEFT animated shapes -->
+  <div class="left">
+    <div class="shape-wrap">
+      <div class="shape"></div>
+      <div class="shape"></div>
+      <div class="shape"></div>
+      <div class="shape"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT login form -->
+  <div class="right" aria-labelledby="loginTitle">
+    <div class="brand">
+      <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="11" fill="#2575fc" opacity="0.95"></circle>
+        <path d="M7 12l3 3 7-8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <h1>RiseIntern</h1>
+    </div>
+
+    <h2 id="loginTitle" class="title">Login to your account</h2>
+    <div class="subtitle">Access your dashboard, internships, and AI recommendations.</div>
+
+    <form id="loginForm" novalidate>
+      <input id="email" type="email" placeholder="Email address" required autocomplete="email" />
+      <input id="password" type="password" placeholder="Password" required />
+
+
+      <select id="role" required>
+  <option value="">Select Role</option>
+  <option value="student">Student</option>
+  <option value="recruiter">Recruiter</option>
+  <option value="admin">Admin</option>
+</select>
+
+
+
+      <button type="submit" class="btn">Login</button>
+
+      <div class="message" id="msgBox" role="status" aria-live="polite"></div>
+      <div class="hint">Don't have an account? <a href="re.html">Register here</a></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msgBox');
+
+    function showMessage(text, ok = true){
+      msg.textContent = text;
+      msg.style.display = 'block';
+      msg.style.background = ok ? '#e7f9f3' : '#fff0f0';
+      msg.style.color = ok ? '#056644' : '#ae1c2c';
+      setTimeout(()=> { msg.style.display = 'none'; }, 4200);
+    }
+
+    function safeLoadUsers(){
+      try {
+        const raw = localStorage.getItem('rise_users');
+        if(!raw) return {};
+        return JSON.parse(raw) || {};
+      } catch(err){
+        console.warn('rise_users is corrupted — clearing and starting fresh.', err);
+        localStorage.removeItem('rise_users');
+        return {};
+      }
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+
+      const email = document.getElementById('email')?.value.trim().toLowerCase();
+      const pass = document.getElementById('password')?.value;
+      const role = document.getElementById('role')?.value;  // must match select in form
+
+      if(!email || !pass || !role){
+        showMessage('Please fill all fields (including role).', false);
+        return;
+      }
+
+      try {
+        const users = safeLoadUsers();
+        const user = users[email];
+
+        if(!user){
+          showMessage('No account found with this email. Please register.', false);
+          return;
+        }
+
+        if(user.pass !== pass){
+          showMessage('Incorrect password. Try again.', false);
+          return;
+        }
+
+        if(user.role !== role){
+          showMessage(`This account is registered as ${user.role}, not ${role}.`, false);
+          return;
+        }
+
+        // Save logged in user
+        localStorage.setItem('rise_user', email);
+
+        console.log('Logged in user:', user);
+        showMessage('Login successful! Redirecting...');
+
+        // Redirect based on role
+        setTimeout(()=> {
+          if(user.role === 'admin') window.location.href = 'admin2.html';
+          else if(user.role === 'recruiter') window.location.href = 'recruiter2.html';
+          else window.location.href = 'student2.html';
+        }, 900);
+
+      } catch(err){
+        console.error('Login error:', err);
+        showMessage('Something went wrong. Try again.', false);
+      }
+    });
+  })();
+</script>
+
+
+</body>
+</html>

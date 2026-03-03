@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RiseIntern – Smart Internships</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #f4f7fb; color: #333; }
+
+    /* Navbar */
+    header {
+      background: linear-gradient(90deg,rgb(184, 31, 120), #00c6ff);
+      padding: 15px 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .logo-container { display: flex; align-items: center; gap: 12px; }
+    .logo-container img {
+      width: 70px; height: 60px;
+      border-radius: 50%;
+      background: rgb(39, 42, 207); padding: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .logo-container h1 { color: #fff; font-size: 2rem; font-weight: 700; }
+    nav a {
+      color: #fff; margin: 0 15px; text-decoration: none;
+      font-weight: 600; transition: 0.3s;
+    }
+    nav a:hover { color: #b88d16; }
+
+    /* Hero Section */
+    .hero {
+      height: 90vh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      background:linear-gradient(-145deg,#004aad,#0073e6,#00c6ff,#00a86b);
+     background: linear-gradient(135deg,rgb(24, 112, 75), #00c6ff);
+     background:linear-gradient(-145deg,#004aad,#0073e6,#00c6ff,#00a86b);
+      color: white; text-align: center; padding: 20px;
+    }
+    .hero h2 { font-size: 3rem; animation: fadeInDown 1s ease; }
+    .hero p { margin: 15px 0; font-size: 1.2rem; opacity: 0.9; animation: fadeInUp 1.5s ease; }
+    .btn {
+      background: #c9a818; color: white;
+      padding: 12px 25px; border: none; border-radius: 40px;
+      cursor: pointer; font-size: 1.2rem; margin-top: 20px;
+      transition: 0.5s;
+    }
+    .btn:hover { background: #ff4500; transform: scale(1.1); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+
+    /* About Section */
+    .about {
+      padding: 70px 50px; background: #3c8294;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 40px;
+    }
+    .about img {
+      flex: 1; max-width: 450px; border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1); animation: fadeInLeft 1.2s ease;
+    }
+    .about p {
+  color: #eb3d26; /* change to any color code */
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+    .about-text { flex: 1; animation: fadeInRight 1.2s ease; }
+    .about-text h2 { font-size: 2.5rem; color:black; margin-bottom: 15px; }
+    .about-text p { font-size: 1.3rem; color:white; line-height: 1.7; }
+
+    /* Features */
+    .features { padding: 60px 50px; text-align: center; }
+    .features h2 { font-size: 2.5rem; margin-bottom: 40px; color: #007bff; }
+    .feature-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;
+    }
+    .card {
+      background: #e0f7fa; border-radius: 15px; padding: 25px;
+      cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    .card h3 { color: #007bff; margin-bottom: 10px; }
+    .card p { font-size: 0.95rem; color: #555; }
+
+    /* Internship Section */
+    .internships { padding: 70px 50px; text-align: center; background: #aac06d; }
+    .internships h2 { font-size: 2.5rem; margin-bottom: 25px; color: #a84272; }
+
+    /* Search Filter */
+    .filter-bar { margin-bottom: 30px; }
+    #searchInput {
+      width: 60%; max-width: 400px;
+      padding: 12px 18px; border: 2px solid #ddd; border-radius: 30px;
+      font-size: 1rem; outline: none; transition: 0.3s;
+    }
+    #searchInput:focus { border-color: #ff5722; box-shadow: 0 0 8px rgba(255,87,34,0.3); }
+
+    .internship-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;
+    }
+    .i-card {
+      background: #fff; border-radius: 15px; padding: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .i-card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    .i-card h3 { margin-bottom: 10px; color: #007bff; }
+    .i-btn {
+      margin-top: 15px; background: #ff5722; color: white;
+      border: none; padding: 10px 20px; border-radius: 25px;
+      cursor: pointer; transition: 0.3s;
+    }
+    .i-btn:hover { background: #e64a19; }
+
+    /* Popup */
+    .popup {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background: rgba(0,0,0,0.6);
+      display: flex; justify-content: center; align-items: center;
+    }
+    .popup-content {
+      background: #fff; padding: 30px; border-radius: 15px;
+      text-align: center; width: 400px; position: relative;
+      animation: fadeIn 0.4s ease;
+    }
+    .popup-content h2 { margin-bottom: 15px; }
+    .close { position: absolute; right: 15px; top: 10px; font-size: 22px; cursor: pointer; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+    /* Footer */
+    footer { background: #222; color: #ddd; padding: 50px 50px 20px; }
+    .footer-container {
+      display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+      gap: 30px; margin-bottom: 30px;
+    }
+    footer h3 { color: #fff; margin-bottom: 15px; }
+    footer a { display: block; color: #bbb; text-decoration: none; margin: 6px 0; transition: 0.3s; }
+    footer a:hover { color: #ff6600; }
+    footer p { text-align: center; margin-top: 20px; font-size: 0.9rem; color: #888; }
+
+    /* Animations */
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="logo-container">
+      <img src="image.png" alt="RiseIntern Logo" />
+      <h1>RiseIntern</h1>
+    </div>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#features">Features</a>
+      <a href="#internships">Internships</a>
+      <a href="#getstarted">Get Started</a>
+      <a href="login1.html">Login</a>
+      <a href="re.html">Register</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <h2>Your Gateway to Smart Internships</h2>
+    <p>Connecting Students with Opportunities under PM Internship Scheme</p>
+    <button class="btn"> <a href="re.html">🚀 Launch RiseIntern</a></button>
+  </section>
+
+  <!-- About -->
+  <section class="about" id="about">
+    <img src="https://img.freepik.com/free-vector/office-workers-analyzing-growth-charts_23-2148866845.jpg" alt="About RiseIntern">
+    <div class="about-text">
+      <h2>About RiseIntern</h2>
+      <p>RiseIntern bridges the gap between students and meaningful internship opportunities. 
+         RiseIntern is a smart internship discovery platform designed to connect students with the right opportunities at the right time. Our mission is to bridge the gap between talented youth and meaningful career pathways by offering AI-powered recommendations, personalized dashboards, and direct integration with government schemes like the PM Internship Program. With a simple, student-friendly interface, RiseIntern empowers learners to explore diverse domains such as software development, data science, digital marketing, finance, and more.  🌟</p>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <h2>Why Choose RiseIntern?</h2>
+    <div class="feature-cards">
+      <div class="card" onclick="openModal('ai')">
+        <h3>🤖 AI Recommendations</h3>
+        <p>Smartly matches you with internships aligned to your skills and career goals.</p>
+      </div>
+      <div class="card" onclick="openModal('govt')">
+        <h3>🇮🇳 Govt Scheme Integration</h3>
+        <p>Aligned with PM Internship Scheme to maximize your opportunities.</p>
+      </div>
+      <div class="card" onclick="openModal('dashboard')">
+        <h3>📊 Smart Dashboard</h3>
+        <p>Track your applications, progress, and personalized suggestions easily.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Internships -->
+  <section class="internships" id="internships">
+    <h2>🔥 Explore Internship Opportunities</h2>
+
+    <!-- Search / Filter Bar -->
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search by category or skill...">
+    </div>
+
+    <div class="internship-cards" id="internshipList">
+      <div class="i-card" data-category="software development coding programming">
+        <h3>💻 Software Development</h3>
+        <p>Work on real-world projects, build scalable applications, and sharpen your coding skills.</p>
+        <button class="i-btn" onclick="openInternship('Software Development')">View Details</button>
+      </div>
+      <div class="i-card" data-category="data science ai ml analytics">
+        <h3>📊 Data Science</h3>
+        <p>Analyze data, build ML models, and gain hands-on experience with AI-driven insights.</p>
+        <button class="i-btn" onclick="openInternship('Data Science')">View Details</button>
+      </div>
+      <div class="i-card" data-category="design ui ux graphics">
+        <h3>🎨 Design</h3>
+        <p>Create stunning user interfaces and engaging user experiences for modern apps.</p>
+        <button class="i-btn" onclick="openInternship('Design')">View Details</button>
+      </div>
+      <div class="i-card" data-category="marketing seo socialmedia business">
+        <h3>📈 Marketing</h3>
+        <p>Learn digital marketing, SEO, and branding strategies with top mentors.</p>
+        <button class="i-btn" onclick="openInternship('Marketing')">View Details</button>
+      </div>
+      <div class="i-card" data-category="finance investment banking economics">
+        <h3>💼 Finance</h3>
+        <p>Get exposure to investment strategies, stock analysis, and financial decision making.</p>
+        <button class="i-btn" onclick="openInternship('Finance')">View Details</button>
+      </div>
+      <div class="i-card" data-category="hr human resources hiring management">
+        <h3>🧑‍🤝‍🧑 Human Resources</h3>
+        <p>Learn HR strategies, hiring processes, and people management with industry experts.</p>
+        <button class="i-btn" onclick="openInternship('Human Resources')">View Details</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Internship Popup -->
+  <div id="internshipPopup" class="popup">
+    <div class="popup-content">
+      <span class="close" onclick="closePopup()">&times;</span>
+      <h2 id="popupTitle"></h2>
+      <p id="popupDesc">Details coming soon...</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer id="getstarted">
+    <div class="footer-container">
+      <div>
+        <h3>About</h3>
+        <a href="#about">Our Mission</a>
+        <a href="#features">Features</a>
+        <a href="#internships">Opportunities</a>
+      </div>
+      <div>
+        <h3>Resources</h3>
+        <a href="#">Blogs</a>
+        <a href="#">Help Center</a>
+        <a href="#">FAQs</a>
+      </div>
+  
+     
+
+
+      <div>
+        <h3>Contact</h3>
+        <a href="#">Email: support@riseintern.com</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Twitter</a>
+      </div>
+    </div>
+    <p>© 2025 RiseIntern | Designed for Smart Internships ✨</p>
+  </footer>
+
+  <!-- Feature Modal -->
+  <div class="modal" id="featureModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3 id="modalTitle"></h3>
+      <p id="modalText"></p>
+    </div>
+  </div>
+
+  <!-- JS -->
+
+  <!-- ================= BACKEND: LOGIN CHECK + NAVBAR USER + LOGOUT ================= -->
+<script>
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    // User not logged in → go to login page
+    window.location.href = "login.html";
+    return;
+  }
+
+  // 1️⃣ Get user data from Firestore
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  const userData = userDoc.data();
+
+  const nav = document.querySelector("nav");
+
+  // 2️⃣ Create user display box (DO NOT MODIFY NAV DESIGN)
+  const userBox = document.createElement("span");
+  userBox.textContent = `👋 ${userData.name} (${userData.role})`;
+  userBox.style.cssText = `
+    background:white;
+    padding:8px 15px;
+    border-radius:8px;
+    margin-left:15px;
+    color:#444;
+    font-weight:600;
+  `;
+  nav.appendChild(userBox);
+
+  // 3️⃣ Create logout button (same style as your website)
+  const logoutBtn = document.createElement("button");
+  logoutBtn.textContent = "Logout";
+  logoutBtn.style.cssText = `
+    background:#ff5252;
+    padding:8px 15px;
+    color:white;
+    border:none;
+    border-radius:8px;
+    margin-left:15px;
+    cursor:pointer;
+    font-weight:600;
+  `;
+  logoutBtn.onclick = () => {
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  };
+
+  nav.appendChild(logoutBtn);
+});
+</script>
+
+  <script>
+    // Features Modal
+    function openModal(feature) {
+      const modal = document.getElementById("featureModal");
+      const title = document.getElementById("modalTitle");
+      const text = document.getElementById("modalText");
+      if(feature === "ai"){
+        title.innerText = "AI Recommendations";
+        text.innerText = "Our AI analyzes your skills, preferences, and career goals to recommend the most suitable internships.";
+      }
+      else if(feature === "govt"){
+        title.innerText = "Govt Scheme Integration";
+        text.innerText = "RiseIntern integrates with government-backed internship programs to give you authentic opportunities.";
+      }
+      else if(feature === "dashboard"){
+        title.innerText = "Smart Dashboard";
+        text.innerText = "Monitor your applications, track deadlines, and receive smart suggestions on your dashboard.";
+      }
+      modal.style.display = "flex";
+    }
+    function closeModal(){ document.getElementById("featureModal").style.display = "none"; }
+    window.onclick = function(event){
+      const modal = document.getElementById("featureModal");
+      if(event.target == modal){ modal.style.display = "none"; }
+    }
+
+    // Internship Popup
+    function openInternship(title) {
+      document.getElementById("popupTitle").innerText = title + " Internship";
+      document.getElementById("popupDesc").innerText =
+        "Here you will find details, eligibility, and application process for " + title + " internships.";
+      document.getElementById("internshipPopup").style.display = "flex";
+    }
+    function closePopup() {
+      document.getElementById("internshipPopup").style.display = "none";
+    }
+
+    // Search Filter
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+      let filter = this.value.toLowerCase();
+      let cards = document.querySelectorAll("#internshipList .i-card");
+      cards.forEach(card => {
+        let category = card.getAttribute("data-category");
+        if (category.toLowerCase().includes(filter)) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+  </script>
+  <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAx3ZwxTYmtmvxfqtOp_LzKUpCTE9cjJyE",
+    authDomain: "rise-intern-47cd2.firebaseapp.com",
+    projectId: "rise-intern-47cd2",
+    storageBucket: "rise-intern-47cd2.firebasestorage.app",
+    messagingSenderId: "481360220760",
+    appId: "1:481360220760:web:9667c81d95355b3a76b02d"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+  const storage = firebase.storage();
+</script>
+
+</body>
+</html>

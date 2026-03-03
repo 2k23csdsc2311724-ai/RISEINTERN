@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RiseIntern — Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ... styles unchanged ... */
+    :root{
+      --card-bg: #ffffff;
+      --accent1: #2575fc;
+      --accent2: #6a11cb;
+      --muted: #666;
+    }
+    html,body{height:100%;margin:0;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; overflow:hidden;}
+    body{display:flex; align-items:center; justify-content:center; padding:0; background:#0f0f3f; position:relative;}
+    #bgCanvas{ position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
+    .register-card{width:100%; max-width:1050px; background:var(--card-bg); border-radius:16px; display:grid; grid-template-columns: 1fr 1fr; box-shadow:0 18px 40px rgba(12,30,70,0.18); overflow:hidden; z-index:1;}
+    @media (max-width:880px){ .register-card { grid-template-columns: 1fr; max-width:760px; } .left { order:2; padding:28px 24px; } .right { order:1; padding:32px 22px; }}
+    .left{background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:48px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;}
+    .icon-wrap{ position:relative; width:100%; max-width:450px; height:350px; }
+    .tech-icon{position:absolute; width:60px; height:60px; animation:float 5s ease-in-out infinite alternate;}
+    .tech-icon svg{ width:100%; height:100%; }
+    .tech-icon:nth-child(1){ top:10%; left:20%; animation-duration:4s; }
+    .tech-icon:nth-child(2){ top:20%; left:65%; animation-duration:5s; }
+    .tech-icon:nth-child(3){ top:50%; left:25%; animation-duration:3.8s; }
+    .tech-icon:nth-child(4){ top:55%; left:60%; animation-duration:4.5s; }
+    .tech-icon:nth-child(5){ top:15%; left:50%; animation-duration:4.2s; }
+    @keyframes float{0%{ transform: translateY(0px) rotate(0deg); }50%{ transform: translateY(-20px) rotate(10deg); }100%{ transform: translateY(0px) rotate(-10deg); }}
+    #role { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background: #fff; color: #333; outline: none; transition: 0.3s; cursor: pointer;}
+    #role:focus { border-color: #6c63ff; box-shadow: 0 0 6px rgba(108, 99, 255, 0.5);}
+    #role option { padding: 10px; background: #fff; color: #333; }
+    .right{ padding:56px; display:flex; flex-direction:column; justify-content:center; gap:8px; }
+    .brand { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+    .brand h1{ color:var(--accent1); font-size:22px; margin:0; }
+    .title{ font-size:28px; color:#17324d; margin:6px 0 18px; font-weight:700; }
+    .subtitle{ color:var(--muted); font-size:14px; margin-bottom:16px; }
+    form{ display:flex; flex-direction:column; gap:12px; }
+    input[type="text"], input[type="email"], input[type="password"], select{ padding:12px 14px; border-radius:10px; border:1px solid #e6e9ee; outline:none; font-size:15px; color:#222; transition: box-shadow .15s, border-color .15s;}
+    input:focus, select:focus{ box-shadow:0 6px 18px rgba(37,117,252,0.12); border-color:rgba(37,117,252,0.6);}
+    .btn{ margin-top:8px; padding:12px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:700; color:white; background: linear-gradient(90deg,var(--accent1), var(--accent2)); box-shadow:0 8px 22px rgba(37,117,252,0.18); transition: transform .12s ease, box-shadow .12s ease;}
+    .btn:hover{ transform:translateY(-3px); box-shadow:0 14px 36px rgba(37,117,252,0.2);}
+    .hint{ font-size:13px; color:var(--muted); margin-top:6px; }
+    .hint a{ color:var(--accent1); text-decoration:none; font-weight:600; }
+    .hint a:hover{ text-decoration:underline; }
+    .message{ padding:10px 12px; border-radius:8px; font-size:14px; background:#eef9f6; color:#056644; display:none; margin-top:8px; }
+    .social-btns {display: flex; gap:10px; margin-bottom:10px;}
+    .social-btn {display: flex; align-items: center; gap:6px; padding: 10px 16px; border-radius:8px; border:none; cursor:pointer; font-weight:600; background:#f2f3ff; color:#333; transition: box-shadow .15s;}
+    .social-btn:hover {box-shadow: 0 2px 16px #2575fc44;}
+    @media (max-width:520px){ .right{ padding:28px; } .left{ padding:20px; } }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+  <div class="register-card" role="main" aria-labelledby="registerTitle">
+    <div class="left">
+      <div class="icon-wrap">     
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" fill="#ffcc00"><rect x="2" y="6" width="20" height="12" rx="2"/><rect x="0" y="18" width="24" height="2"/></svg>
+        </div>
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" fill="#00ffcc"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="M19.4 12.6l1.5-2.5-2.5-1.5-1.5 2.5a7 7 0 0 0-2-.8l-.5-3H9l-.5 3a7 7 0 0 0-2 .8L5 8.6 2.5 10l1.5 2.5a7 7 0 0 0 0 1.8L2.5 17 5 18.4l1.5-2.5a7 7 0 0 0 2 .8l.5 3h3l.5-3a7 7 0 0 0 2-.8z"/></svg>
+        </div>
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" fill="#ff3366"><rect x="3" y="13" width="3" height="8"/><rect x="8" y="9" width="3" height="12"/><rect x="13" y="5" width="3" height="16"/><rect x="18" y="11" width="3" height="10"/></svg>
+        </div>
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" fill="#33ffcc"><rect x="6" y="6" width="12" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="tech-icon">
+          <svg viewBox="0 0 24 24" fill="#ff6600"><path d="M3 21v-3l12-12 3 3L6 21H3z"/><path d="M14 9l-3-3"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="right" aria-labelledby="registerTitle">
+      <div class="brand">
+        <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="11" fill="#2575fc" opacity="0.95"></circle>
+          <path d="M7 12l3 3 7-8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <h1>RiseIntern</h1>
+      </div>
+      <h2 id="registerTitle" class="title">Create your account</h2>
+      <div class="subtitle">Register to explore curated internships, AI recommendations, and government schemes.</div>
+      
+      <!-- Social Signup Buttons -->
+      <div class="social-btns">
+        <button type="button" class="social-btn" id="googleSignUp">
+          <img src="https://www.svgrepo.com/show/355037/google.svg" width="24" height="24" alt=""> Signup with Google
+        </button>
+        <button type="button" class="social-btn" id="facebookSignUp">
+          <img src="https://www.svgrepo.com/show/349557/facebook.svg" width="24" height="24" alt=""> Signup with Facebook
+        </button>
+      </div>
+      <form id="regForm" novalidate>
+        <input id="name" type="text" placeholder="Full name" required autocomplete="name" />
+        <input id="email" type="email" placeholder="Email address" required autocomplete="email" />
+        <input id="password" type="password" placeholder="Password (min 6 chars)" minlength="6" required />
+        <select id="role" required>
+          <option value="">Select Role</option>
+          <option value="student">Student</option>
+          <option value="recruiter">Recruiter</option>
+          <option value="admin">Admin</option>
+        </select>
+        <select id="interest" required>
+          <option value="">Select your interest</option>
+          <option>Software Development</option>
+          <option>Data Science</option>
+          <option>Web Development</option>
+          <option>AI / ML</option>
+          <option>Marketing</option>
+          <option>Design</option>
+        </select>
+        <button type="submit" class="btn">Register</button>
+        <div class="message" id="msgBox" role="status" aria-live="polite"></div>
+        <div class="hint">Already have an account? <a href="login2.html">Login here</a></div>
+      </form>
+    </div>
+  </div>
+  <script>
+    // BG Canvas
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    window.addEventListener('resize', ()=>{
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+    class Particle{
+      constructor(){
+        this.x = Math.random()*width;
+        this.y = Math.random()*height;
+        this.vx = (Math.random()-0.5)*0.5;
+        this.vy = (Math.random()-0.5)*0.5;
+        this.size = Math.random()*2+1;
+        this.color = `hsl(${Math.random()*360}, 80%, 60%)`;
+      }
+      update(){
+        this.x += this.vx;
+        this.y += this.vy;
+        if(this.x<0||this.x>width) this.vx*=-1;
+        if(this.y<0||this.y>height) this.vy*=-1;
+      }
+      draw(){
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+    const particles = Array.from({length:120}, ()=> new Particle());
+    function animate(){
+      ctx.clearRect(0,0,width,height);
+      for(let p of particles){
+        p.update();
+        p.draw();
+      }
+      for(let i=0;i<particles.length;i++){
+        for(let j=i+1;j<particles.length;j++){
+          let dx = particles[i].x-particles[j].x;
+          let dy = particles[i].y-particles[j].y;
+          let dist = Math.sqrt(dx*dx + dy*dy);
+          if(dist<120){
+            ctx.strokeStyle = `hsla(200, 80%, 60%, ${1-dist/120})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+  <!-- Firebase Config & Registration Logic -->
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAx3ZwxTYmtmvxfqtOp_LzKUpCTE9cjJyE",
+      authDomain: "rise-intern-47cd2.firebaseapp.com",
+      projectId: "rise-intern-47cd2",
+      storageBucket: "rise-intern-47cd2.appspot.com",
+      messagingSenderId: "481360220760",
+      appId: "1:481360220760:web:9667c81d95355b3a76b02d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Registration logic
+    (function () {
+      const form = document.getElementById('regForm');
+      const msg = document.getElementById('msgBox');
+      function showMessage(text, ok = true) {
+        msg.textContent = text;
+        msg.style.display = 'block';
+        msg.style.background = ok ? '#e7f9f3' : '#fff0f0';
+        msg.style.color = ok ? '#056644' : '#ae1c2c';
+        setTimeout(() => { msg.style.display = 'none'; }, 4200);
+      }
+
+      // Email/password signup
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('password').value;
+        const role = document.getElementById('role').value;
+        const interest = document.getElementById('interest').value;
+        if (!name || !email || !pass || !interest || !role) {
+          showMessage('Please fill all fields.', false);
+          return;
+        }
+        if (pass.length < 6) {
+          showMessage('Password must be at least 6 characters.', false);
+          return;
+        }
+        showMessage('Registering...', true);
+        auth.createUserWithEmailAndPassword(email, pass)
+          .then(cred => {
+            return db.collection('users').doc(cred.user.uid).set({
+              name: name,
+              email: email,
+              role: role,
+              interest: interest,
+              created: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          })
+          .then(() => {
+            showMessage('Registered Successfully!');
+            if (role === "student") window.location.href = "student2.html";
+            if (role === "recruiter") window.location.href = "recruiter2.html";
+            if (role === "admin") window.location.href = "admin2.html";
+          })
+          .catch(err => {
+            if (err.code === 'auth/email-already-in-use') {
+              showMessage('An account with this email already exists. Please login.', false);
+            } else {
+              showMessage(err.message, false);
+            }
+          });
+      });
+
+      // Google signup
+      document.getElementById('googleSignUp').addEventListener('click', function () {
+        const role = document.getElementById('role').value;
+        const interest = document.getElementById('interest').value;
+        if (!role || !interest) {
+          showMessage("Select your Role and Interest before social signup.", false);
+          return;
+        }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider)
+          .then(result => {
+            const user = result.user;
+            return db.collection('users').doc(user.uid).set({
+              name: user.displayName,
+              email: user.email,
+              role: role,
+              interest: interest,
+              created: firebase.firestore.FieldValue.serverTimestamp(),
+              provider: "google"
+            }, { merge: true });
+          })
+          .then(() => {
+            showMessage('Registered Successfully with Google!');
+            if (role === "student") window.location.href = "student2.html";
+            if (role === "recruiter") window.location.href = "recruiter2.html";
+            if (role === "admin") window.location.href = "admin2.html";
+          })
+          .catch(err => {
+            showMessage(err.message, false);
+          });
+      });
+
+      // Facebook signup
+      document.getElementById('facebookSignUp').addEventListener('click', function () {
+        const role = document.getElementById('role').value;
+        const interest = document.getElementById('interest').value;
+        if (!role || !interest) {
+          showMessage("Select your Role and Interest before social signup.", false);
+          return;
+        }
+        const provider = new firebase.auth.FacebookAuthProvider();
+        auth.signInWithPopup(provider)
+          .then(result => {
+            const user = result.user;
+            return db.collection('users').doc(user.uid).set({
+              name: user.displayName,
+              email: user.email,
+              role: role,
+              interest: interest,
+              created: firebase.firestore.FieldValue.serverTimestamp(),
+              provider: "facebook"
+            }, { merge: true });
+          })
+          .then(() => {
+            showMessage('Registered Successfully with Facebook!');
+            if (role === "student") window.location.href = "student2.html";
+            if (role === "recruiter") window.location.href = "recruiter2.html";
+            if (role === "admin") window.location.href = "admin2.html";
+          })
+          .catch(err => {
+            showMessage(err.message, false);
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

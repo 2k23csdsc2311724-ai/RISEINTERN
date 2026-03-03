@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RiseIntern · Student Dashboard</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-1:#0e1525;
+    --bg-2:#0b1020;
+    --card:rgba(255,255,255,0.06);
+    --stroke:rgba(255,255,255,0.1);
+    --text:#e8f0ff;
+    --muted:#9db0cf;
+    --accent:#00d4ff;
+    --accent-2:#7c4dff;
+    --good:#22c55e;
+    --warn:#f59e0b;
+    --bad:#ef4444;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--text);
+    background: radial-gradient(1200px 600px at 15% -10%, #1b2559 0%, transparent 55%),
+                radial-gradient(1000px 500px at 110% 10%, #1b1f4a 0%, transparent 60%),
+                linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    overflow-x:hidden;
+  }
+
+
+  .dots::before, .dots::after{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+      radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 22px 22px, 38px 38px;
+    background-position: 0 0, 10px 8px;
+    mask-image: radial-gradient(ellipse at 70% 10%, rgba(0,0,0,.9), transparent 70%);
+  }
+  .dots::after{ filter: blur(0.3px); opacity:.6 }
+
+  
+  .app{
+    display:grid;
+    grid-template-columns: 260px 1fr;
+    min-height:100vh;
+    position:relative;
+    z-index:1;
+  }
+  aside{
+    position:sticky; top:0; height:100vh;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border-right:1px solid var(--stroke);
+    padding:22px 18px;
+    display:flex; flex-direction:column; gap:16px;
+    backdrop-filter: blur(10px);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px; padding-bottom:12px;
+    border-bottom:1px dashed var(--stroke);
+  }
+  .brand-logo{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:grid; place-items:center; color:#00131a; font-weight:800;
+  }
+  .brand h1{ font: 700 18px/1 "Outfit", sans-serif; margin:0 }
+  .mini-card{
+    background:var(--card); border:1px solid var(--stroke);
+    border-radius:14px; padding:14px;
+  }
+  .mini-card .nm{ font-weight:600 }
+  .nav a{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px;
+    color:var(--text); text-decoration:none; font-weight:600; letter-spacing:.2px;
+    transition: transform .2s, background .2s;
+  }
+  .nav a:hover{ background:rgba(255,255,255,0.07); transform:translateX(4px) }
+  .nav small{ color:var(--muted); font-weight:400 }
+
+  main{ padding:28px; }
+  header.hero{
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+    padding:16px 18px; border:1px solid var(--stroke); border-radius:16px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  .hero h2{
+    margin:0; font:700 28px/1.2 "Outfit", sans-serif;
+    background: linear-gradient(90deg, #ffffff, #bfeaff, #a58bff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p{ color:var(--muted); margin-top:6px }
+
+  .search{
+    display:flex; gap:10px; align-items:center;
+    background:var(--card); border:1px solid var(--stroke); border-radius:12px; padding:8px 10px;
+  }
+  .search input{
+    background:transparent; border:0; outline:0; color:var(--text); width:220px;
+  }
+  .btn{
+    padding:10px 14px; border:0; border-radius:10px; cursor:pointer; font-weight:700;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#00131a;
+    box-shadow: 0 10px 20px rgba(0,212,255,0.2);
+    transition: transform .15s ease;
+  }
+  .btn:hover{ transform: translateY(-2px) }
+
+ 
+  .grid{
+    display:grid; gap:18px; margin-top:22px;
+    grid-template-columns: 1.3fr 1fr;
+  }
+  .card{
+    background:var(--card); border:1px solid var(--stroke);
+    border-radius:16px; padding:18px;
+    animation: rise .6s ease both;
+  }
+  .card h3{ margin:0 0 10px 0; font:600 18px/1.2 "Outfit" }
+  .meta{ color:var(--muted); font-size:14px; margin-bottom:10px }
+
+  @keyframes rise{ from{ opacity:0; transform:translateY(8px) } to{opacity:1; transform:none} }
+
+  .stats{ display:grid; gap:14px; grid-template-columns: repeat(4,1fr) }
+  .stat{
+    background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border:1px solid var(--stroke); border-radius:14px; padding:14px; text-align:center;
+  }
+  .stat .num{ font:700 22px "Outfit"; }
+  .stat .lbl{ color:var(--muted); font-size:12px; margin-top:4px }
+
+ 
+  .list{ display:grid; gap:12px }
+  .job{
+    display:grid; grid-template-columns: 1fr auto; gap:12px; align-items:center;
+    padding:12px; border:1px dashed var(--stroke); border-radius:12px;
+    background:rgba(255,255,255,0.04);
+  }
+  .job h4{ margin:0; font:600 16px/1.2 "Outfit" }
+  .job p{ margin:4px 0 0; color:var(--muted); font-size:13px }
+  .row{ display:flex; gap:8px; flex-wrap:wrap }
+  .btn-subtle{
+    padding:8px 10px; border-radius:10px; border:1px solid var(--stroke);
+    background:rgba(255,255,255,0.04); color:var(--text); cursor:pointer; font-weight:600;
+  }
+  .btn-good{ background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.3); color:#a6f3c1 }
+  .btn-warn{ background:rgba(245,158,11,.12); border-color:rgba(245,158,11,.3); color:#ffe3b0 }
+
+  
+  .timeline{ position:relative; padding-left:18px }
+  .timeline::before{
+    content:""; position:absolute; left:6px; top:6px; bottom:6px; width:2px; background:var(--stroke);
+  }
+  .tl-item{ position:relative; padding:8px 0 8px 18px }
+  .tl-item::before{
+    content:""; position:absolute; left:-2px; top:12px; width:10px; height:10px; border-radius:50%;
+    background:linear-gradient(90deg, var(--accent), var(--accent-2)); box-shadow:0 0 8px rgba(0,212,255,.6);
+  }
+
+
+  .badges{ display:flex; gap:10px; flex-wrap:wrap }
+  .badge{
+    padding:8px 12px; border-radius:999px; border:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    font-weight:700; font-size:12px;
+  }
+
+
+  .resources{ display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+  .resource{ padding:14px; border-radius:12px; border:1px solid var(--stroke); background:rgba(255,255,255,.04) }
+  .resource a{ color:var(--accent); text-decoration:none }
+
+ 
+  footer{
+    margin-top:28px; position:relative; overflow:hidden;
+    border-top:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  }
+  .waves{
+    position:absolute; left:0; right:0; top:-1px; height:70px; pointer-events:none; opacity:.6;
+    background:
+     radial-gradient(60px 20px at 10% 0, rgba(124,77,255,.25) 0 60%, transparent 61%),
+     radial-gradient(60px 20px at 30% 0, rgba(0,212,255,.25) 0 60%, transparent 61%),
+     radial-gradient(60px 20px at 50% 0, rgba(124,77,255,.25) 0 60%, transparent 61%),
+     radial-gradient(60px 20px at 70% 0, rgba(0,212,255,.25) 0 60%, transparent 61%),
+     radial-gradient(60px 20px at 90% 0, rgba(124,77,255,.25) 0 60%, transparent 61%);
+    animation: bob 8s ease-in-out infinite;
+  }
+  @keyframes bob{ 0%,100%{ transform:translateY(-8px) } 50%{ transform:translateY(6px) } }
+
+
+  @media (max-width: 980px){
+    .app{ grid-template-columns: 1fr }
+    aside{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--stroke) }
+    .grid{ grid-template-columns: 1fr }
+  }
+</style>
+</head>
+<body class="dots">
+
+<div class="app">
+  <aside>
+    <div class="brand">
+      <div class="brand-logo">R</div>
+      <h1>RiseIntern</h1>
+    </div>
+
+    <div class="mini-card">
+      <div class="nm" id="nmMini">Student</div>
+      <div class="meta" id="emMini">email@example.com</div>
+      <div class="badges" id="miniBadges">
+        <span class="badge">Newbie</span>
+      </div>
+    </div>
+
+    <div class="nav">
+      <a href="#home" onclick="goto('home')">🏠 <span>Dashboard</span></a>
+      <a href="#internships" onclick="goto('internships')">🧭 <span>Internships</span></a>
+      <a href="#applications" onclick="goto('applications')">🗂️ <span>Applications</span></a>
+      <a href="#resume" onclick="goto('resume')">📄 <span>Resume</span></a>
+      <a href="#parse" onclick="goto('parse')">🧬 <span>Resume Parsing</span></a>
+
+      <a href="#resources" onclick="goto('resources')">📚 <span>Resources</span></a>
+      <a href="#events" onclick="goto('events')">📅 <span>Events</span></a>
+      <a href="#notifications" onclick="goto('notifications')">🔔 <span>Notifications</span></a>
+      <a href="javascript:void(0)" onclick="logout()">🚪 <span>Logout</span></a>
+      <small>v1.0 Student</small>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <header class="hero">
+      <div>
+        <h2 id="heroTitle">Welcome back 👋</h2>
+        <p>Track your progress, apply faster, and grow your skills with curated opportunities.</p>
+      </div>
+      <div class="search">
+        <input id="search" placeholder="Search internships..." onkeyup="filterJobs()" />
+        <button class="btn" onclick="goto('internships')">Search</button>
+      </div>
+    </header>
+
+    <!-- Overview + Stats -->
+    <section id="home" class="grid">
+      <div class="card">
+        <h3>Overview</h3>
+        <div class="meta">A quick snapshot of your job search.</div>
+        <div class="stats">
+          <div class="stat"><div class="num" id="statApps">0</div><div class="lbl">Applications</div></div>
+          <div class="stat"><div class="num" id="statSaved">0</div><div class="lbl">Saved</div></div>
+          <div class="stat"><div class="num" id="statReco">0</div><div class="lbl">Recommended</div></div>
+          <div class="stat"><div class="num" id="statResume">0%</div><div class="lbl">Resume Score</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Achievements</h3>
+        <div class="meta">Unlock badges as you engage.</div>
+        <div class="badges" id="badgesBox">
+          <span class="badge">Profile Created</span>
+        </div>
+      </div>
+    </section>
+
+    
+    <!-- Internships -->
+    <section id="internships" class="grid">
+      <div class="card">
+        <h3>Available Internships</h3>
+        <div class="list" id="internshipList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Recommended For You</h3>
+        <div class="meta" id="recoMeta">Based on your interest.</div>
+        <div class="list" id="recoList"></div>
+      </div>
+    </section>
+
+    <!-- Applications -->
+    <section id="applications" class="grid">
+      <div class="card">
+        <h3>My Applications</h3>
+        <div class="list" id="appliedList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Announcements</h3>
+        <div id="notifList"></div>
+      </div>
+    </section>
+
+    <!-- Resume Parsing -->
+<section id="parse" class="grid">
+  <div class="card">
+    <h3>Resume Parsing</h3>
+    <div class="meta">Upload a resume and let the system analyze it using AI.</div>
+
+    <input type="file" id="parseUpload" accept=".pdf,.doc,.docx" onchange="handleParseUpload()" />
+    <p id="parseStatus" style="margin-top:8px;">No file uploaded.</p>
+
+    <div style="margin-top:12px">
+      <button class="btn" onclick="generateParseAI()">Parse Resume</button>
+    </div>
+
+    <hr style="margin:18px 0; border:0; border-top:1px solid var(--stroke)" />
+
+    <h4 style="margin:0 0 6px">Extracted Text</h4>
+    <div id="parsedText" class="resource" style="max-height:200px; overflow:auto; white-space:pre-wrap;"></div>
+
+    <h4 style="margin-top:18px; margin-bottom:6px">AI Skills</h4>
+    <div id="parsedSkills" class="badges"></div>
+
+    <h4 style="margin-top:18px; margin-bottom:6px">AI Feedback</h4>
+    <div id="parsedFeedback" class="resource"></div>
+  </div>
+
+  <div class="card">
+    <h3>ATS Score</h3>
+    <div class="meta">Estimated compatibility</div>
+    <div id="parseScore" style="font-size:42px; font-weight:800; margin-top:10px;">0%</div>
+  </div>
+</section>
+
+    <!-- Resume & Resources -->
+    <section id="resume" class="grid">
+      <div class="card">
+        <h3>Resume</h3>
+        <div class="meta">Upload your latest resume for better matching.</div>
+        <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx" onchange="uploadResume()" />
+        <p id="resumeStatus" style="margin-top:8px;">No resume uploaded yet.</p>
+        <div style="margin-top:12px">
+          <button class="btn" onclick="mockScore()">Recalculate Resume Score</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Learning Resources</h3>
+        <div class="resources" id="resList"></div>
+      </div>
+    </section>
+
+    <!-- Events / Timeline -->
+    <section id="events" class="grid">
+      <div class="card">
+        <h3>Upcoming Events</h3>
+        <div class="timeline" id="eventList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Your Timeline</h3>
+        <div class="timeline" id="timelineList"></div>
+      </div>
+    </section>
+
+    <!-- Notifications standalone -->
+    <section id="notifications" class="grid">
+      <div class="card">
+        <h3>Notifications</h3>
+        <div id="notifList2"></div>
+      </div>
+      <div class="card">
+        <h3>Saved Internships</h3>
+        <div class="list" id="savedList"></div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="waves"></div>
+      <div style="padding:18px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <span>© <span id="yr"></span> RiseIntern · Crafted for students</span>
+        <span>Need help? <a href="#" style="color:var(--accent)">Contact support</a></span>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<script>
+  /* ---------- Data ---------- */
+  const internships = [
+    { id:1, title:"Web Developer Intern", company:"TechNova", location:"Remote", tags:["Web","HTML","CSS","JS"] },
+    { id:2, title:"Data Analyst Intern", company:"DataWorks", location:"Bangalore", tags:["Python","SQL","Excel"] },
+    { id:3, title:"Java Developer Intern", company:"CodeSmiths", location:"Delhi", tags:["Java","OOP","Spring"] },
+    { id:4, title:"AI Research Intern", company:"DeepAI", location:"Hyderabad", tags:["AI/ML","Python","TensorFlow"] },
+    { id:5, title:"Cloud Engineer Intern", company:"SkyNet", location:"Pune", tags:["Cloud","AWS","DevOps"] },
+    { id:6, title:"UI/UX Intern", company:"PixelPlay", location:"Remote", tags:["Figma","Design","Prototyping"] }
+  ];
+
+  const resources = [
+    { t:"Modern JavaScript", link:"https://javascript.info/", note:"Deep, practical JS guide" },
+    { t:"SQLBolt", link:"https://sqlbolt.com/", note:"Interactive SQL lessons" },
+    { t:"Roadmap.sh", link:"https://roadmap.sh/", note:"Career roadmaps" },
+    { t:"InterviewBit", link:"https://www.interviewbit.com/", note:"Interview prep" }
+  ];
+
+  const events = [
+    { when:"This Week", what:"Campus Career Fair — register now" },
+    { when:"Oct 12", what:"Resume Clinic: 1:1 with mentors" },
+    { when:"Oct 20", what:"Hackathon: Build for Good" }
+  ];
+
+  const notices = [
+    "🚀 Google Summer of Code guide updated.",
+    "⚡ Your DataWorks application was viewed.",
+    "📢 New AI/ML internships added for Hyderabad."
+  ];
+
+  /* ---------- Elements ---------- */
+  const el = id => document.getElementById(id);
+  const internshipList = el('internshipList');
+  const appliedList = el('appliedList');
+  const savedList = el('savedList');
+  const recoList = el('recoList');
+  const notifList = el('notifList');
+  const notifList2 = el('notifList2');
+  const resList = el('resList');
+  const eventList = el('eventList');
+  const timelineList = el('timelineList');
+
+  /* ---------- Rendering ---------- */
+  function renderInternships(items = internships){
+    internshipList.innerHTML = "";
+    items.forEach(job=>{
+      const d = document.createElement('div');
+      d.className = "job";
+      d.innerHTML = `
+        <div>
+          <h4>${job.title}</h4>
+          <p>${job.company} — ${job.location}</p>
+          <div class="row" style="margin-top:6px">${job.tags.map(t=>`<span class="badge">${t}</span>`).join('')}</div>
+        </div>
+        <div class="row">
+          <button class="btn-subtle btn-good" onclick="apply(${job.id})">Apply</button>
+          <button class="btn-subtle btn-warn" onclick="saveJob(${job.id})">Save</button>
+        </div>
+      `;
+      internshipList.appendChild(d);
+    });
+  }
+
+  function renderApplied(){
+    appliedList.innerHTML="";
+    const applied = JSON.parse(localStorage.getItem('applied')||"[]");
+    if(!applied.length){ appliedList.innerHTML = `<p class="meta">No applications yet.</p>`; return; }
+    applied.forEach(job=>{
+      const d = document.createElement('div');
+      d.className="job";
+      d.innerHTML = `<div><h4>${job.title}</h4><p>${job.company} — ${job.location}</p></div>
+                     <div class="row"><button class="btn-subtle" onclick="removeApplication(${job.id})">Remove</button></div>`;
+      appliedList.appendChild(d);
+    });
+  }
+
+  function renderSaved(){
+    savedList.innerHTML="";
+    const saved = JSON.parse(localStorage.getItem('saved')||"[]");
+    if(!saved.length){ savedList.innerHTML = `<p class="meta">No saved internships.</p>`; return; }
+    saved.forEach(job=>{
+      const d = document.createElement('div');
+      d.className="job";
+      d.innerHTML = `<div><h4>${job.title}</h4><p>${job.company} — ${job.location}</p></div>
+                     <div class="row"><button class="btn-subtle btn-good" onclick="apply(${job.id})">Apply</button>
+                     <button class="btn-subtle" onclick="unsaveJob(${job.id})">Unsave</button></div>`;
+      savedList.appendChild(d);
+    });
+  }
+
+  function renderReco(){
+    const users = JSON.parse(localStorage.getItem("rise_users")||"{}");
+    const email = localStorage.getItem("rise_user");
+    const user = users[email] || {};
+    const interest = (user.interest||"").toLowerCase();
+    let filtered = internships.filter(j =>
+      j.title.toLowerCase().includes(interest) || j.tags.join(" ").toLowerCase().includes(interest)
+    );
+    if(!filtered.length) filtered = internships.slice(0,3);
+    recoList.innerHTML="";
+    filtered.forEach(job=>{
+      const d = document.createElement('div');
+      d.className="job";
+      d.innerHTML = `<div><h4>${job.title}</h4><p>${job.company} — ${job.location}</p></div>
+                     <div class="row"><button class="btn-subtle btn-good" onclick="apply(${job.id})">Apply</button></div>`;
+      recoList.appendChild(d);
+    });
+    el('statReco').textContent = filtered.length;
+    el('recoMeta').textContent = `Based on your interest: ${user.interest||"All"}`;
+  }
+
+  function renderResources(){
+    resList.innerHTML = resources.map(r=>`
+      <div class="resource">
+        <strong>${r.t}</strong><br>
+        <span class="meta">${r.note}</span><br>
+        <a href="${r.link}" target="_blank" rel="noopener">Open</a>
+      </div>
+    `).join('');
+  }
+
+  function renderEvents(){
+    eventList.innerHTML = events.map(e=>`
+      <div class="tl-item"><div class="meta">${e.when}</div><div>${e.what}</div></div>
+    `).join('');
+  }
+
+  function renderNotices(){
+    notifList.innerHTML = "";
+    notifList2.innerHTML = "";
+    notices.forEach(n=>{
+      const x = document.createElement('div');
+      x.className = "resource";
+      x.textContent = n;
+      notifList.appendChild(x.cloneNode(true));
+      notifList2.appendChild(x);
+    });
+  }
+
+  function renderTimeline(){
+    const t = JSON.parse(localStorage.getItem('timeline')||"[]");
+    timelineList.innerHTML = t.map(it=>`
+      <div class="tl-item"><div class="meta">${it.when}</div><div>${it.what}</div></div>
+    `).join('');
+  }
+
+  /* ---------- Actions ---------- */
+  function apply(id){
+    let applied = JSON.parse(localStorage.getItem('applied')||"[]");
+    const job = internships.find(j=>j.id===id);
+    if(applied.some(j=>j.id===id)) { alert("✅ Already applied!"); return; }
+    applied.push(job);
+    localStorage.setItem('applied', JSON.stringify(applied));
+    addTimeline(`Applied to ${job.title}`);
+    unlock("First Application");
+    renderApplied(); updateStats();
+    alert("🎉 Application submitted!");
+  }
+
+  function removeApplication(id){
+    let applied = JSON.parse(localStorage.getItem('applied')||"[]").filter(j=>j.id!==id);
+    localStorage.setItem('applied', JSON.stringify(applied));
+    addTimeline("Removed an application");
+    renderApplied(); updateStats();
+  }
+
+  function saveJob(id){
+    let saved = JSON.parse(localStorage.getItem('saved')||"[]");
+    const job = internships.find(j=>j.id===id);
+    if(saved.some(j=>j.id===id)) { alert("⭐ Already saved!"); return; }
+    saved.push(job); localStorage.setItem('saved', JSON.stringify(saved));
+    addTimeline(`Saved ${job.title}`);
+    unlock("Saver");
+    renderSaved(); updateStats();
+  }
+
+  function unsaveJob(id){
+    let saved = JSON.parse(localStorage.getItem('saved')||"[]").filter(j=>j.id!==id);
+    localStorage.setItem('saved', JSON.stringify(saved));
+    renderSaved(); updateStats();
+  }
+
+  function uploadResume(){
+    const file = el("resumeUpload").files[0];
+    if(file){
+      localStorage.setItem("resumeFile", file.name);
+      el("resumeStatus").textContent = "Uploaded: " + file.name;
+      mockScore();
+      unlock("Resume Ready");
+      updateStats();
+      addTimeline("Updated Resume");
+    }
+  }
+
+  function mockScore(){
+    const score = Math.floor(70 + Math.random()*30);
+    localStorage.setItem("resumeScore", score);
+    el("statResume").textContent = score + "%";
+  }
+
+  function addTimeline(what){
+    const t = JSON.parse(localStorage.getItem('timeline')||"[]");
+    t.unshift({ when: new Date().toLocaleString(), what });
+    localStorage.setItem('timeline', JSON.stringify(t.slice(0,8)));
+    renderTimeline();
+  }
+
+  function unlock(badge){
+    const key="badges";
+    const list = JSON.parse(localStorage.getItem(key)||"[]");
+    if(!list.includes(badge)){ list.push(badge); localStorage.setItem(key, JSON.stringify(list)); renderBadges(); }
+  }
+
+  function renderBadges(){
+    const box = el("badgesBox");
+    const mini = el("miniBadges");
+    const list = JSON.parse(localStorage.getItem("badges")||"[]");
+    const chips = list.map(b=>`<span class="badge">${b}</span>`).join('');
+    box.innerHTML = chips || `<span class="badge">Profile Created</span>`;
+    mini.innerHTML = chips || `<span class="badge">Newbie</span>`;
+  }
+
+  function filterJobs(){
+    const q = (el("search").value||"").toLowerCase();
+    const filtered = internships.filter(j =>
+      j.title.toLowerCase().includes(q) ||
+      j.company.toLowerCase().includes(q) ||
+      j.location.toLowerCase().includes(q) ||
+      j.tags.join(" ").toLowerCase().includes(q)
+    );
+    renderInternships(filtered);
+  }
+
+  
+
+  function goto(id){
+    
+    document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function updateStats(){
+    el("statApps").textContent = JSON.parse(localStorage.getItem('applied')||"[]").length;
+    el("statSaved").textContent = JSON.parse(localStorage.getItem('saved')||"[]").length;
+    const score = localStorage.getItem("resumeScore") || 0;
+    el("statResume").textContent = score + "%";
+  }
+
+  
+
+  function hydrateProfile(){
+    const users = JSON.parse(localStorage.getItem("rise_users")||"{}");
+    const email = localStorage.getItem("rise_user");
+    const user = users[email] || {};
+    el("nmMini").textContent = user.name || "Student";
+    el("emMini").textContent = email || "email@example.com";
+    el("heroTitle").textContent = `Welcome back, ${user.name||"Student"} 👋`;
+  }
+  function bootLists(){
+    renderResources(); renderEvents(); renderNotices(); renderTimeline();
+  }
+
+  window.onload = ()=>{
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    hydrateProfile();
+    renderInternships();
+    renderApplied();
+    renderSaved();
+    renderReco();
+    renderBadges();
+    bootLists();
+    updateStats();
+    unlock("Visited Dashboard");
+  }
+
+  function logout(){
+    localStorage.removeItem('rise_user');
+    window.location.href="index.html";
+  }
+</script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAx3ZwxTYmtmvxfqtOp_LzKUpCTE9cjJyE",
+    authDomain: "rise-intern-47cd2.firebaseapp.com",
+    projectId: "rise-intern-47cd2",
+    storageBucket: "rise-intern-47cd2.firebasestorage.app",
+    messagingSenderId: "481360220760",
+    appId: "1:481360220760:web:9667c81d95355b3a76b02d"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+  const storage = firebase.storage();
+</script>
+
+
+<script>
+// Resume Parsing Logic
+let resumeParseFile = null;
+
+function handleParseUpload() {
+  const file = document.getElementById("parseUpload").files[0];
+  if (!file) return;
+
+  resumeParseFile = file;
+  document.getElementById("parseStatus").textContent = "Uploaded: " + file.name;
+}
+
+function generateParseAI() {
+  if (!resumeParseFile) {
+    alert("Please upload a resume first.");
+    return;
+  }
+
+  // TEMPORARY (Replace with Firebase AI later)
+  const fakeExtractedText = `
+Name: Example Student
+Skills: Java, Python, HTML, SQL
+Education: B.Tech CSE
+Experience: 6-month internship in Web Development
+`.trim();
+
+  const fakeSkills = ["Java", "Python", "HTML", "SQL"];
+  const fakeFeedback = "Your resume is strong, but add measurable achievements.";
+  const fakeScore = Math.floor(60 + Math.random() * 40);
+
+  document.getElementById("parsedText").textContent = fakeExtractedText;
+
+  document.getElementById("parsedSkills").innerHTML =
+    fakeSkills.map(s => `<span class="badge">${s}</span>`).join("");
+
+  document.getElementById("parsedFeedback").innerHTML =
+    `<p>${fakeFeedback}</p>`;
+
+  document.getElementById("parseScore").textContent = fakeScore + "%";
+}
+</script>
+
+
+</body>
+</html>

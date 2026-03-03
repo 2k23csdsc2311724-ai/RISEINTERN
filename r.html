@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RiseIntern — Register</title>
+
+  <!-- GOOGLE FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* UI same as yours — NOT changed */
+    :root{
+      --card-bg: #ffffff;
+      --accent1: #2575fc;
+      --accent2: #6a11cb;
+      --muted: #666;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:"Poppins";
+      overflow:hidden;
+    }
+
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#0f0f3f;
+      position:relative;
+    }
+
+    #bgCanvas{
+      position:absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      z-index:0;
+    }
+
+    .register-card{
+      width:100%;
+      max-width:1050px;
+      background:var(--card-bg);
+      border-radius:16px;
+      box-shadow:0 18px 40px rgba(12,30,70,0.18);
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      overflow:hidden;
+      z-index:1;
+    }
+
+    @media (max-width:880px){
+      .register-card{
+        grid-template-columns:1fr;
+        max-width:760px;
+      }
+      .left { order:2; }
+      .right { order:1; }
+    }
+
+    .left{
+      padding:48px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    }
+
+    .icon-wrap{position:relative;width:100%;max-width:450px;height:350px;}
+    .tech-icon{position:absolute;width:60px;height:60px;animation:float 5s infinite alternate ease-in-out;}
+
+    @keyframes float{
+      0%{ transform:translateY(0px); }
+      50%{ transform:translateY(-20px); }
+      100%{ transform:translateY(0px); }
+    }
+
+    .right{
+      padding:56px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      position:relative;
+      z-index:2;
+    }
+
+    /* Fix Google Button Blocking Issue */
+    .social-btns{
+      display:flex;
+      gap:10px;
+      margin-bottom:20px;
+      position:relative;
+      z-index:3; /* ensures clickable */
+    }
+
+    .social-btn{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:10px 16px;
+      background:#f2f3ff;
+      cursor:pointer;
+      border-radius:8px;
+      font-weight:600;
+      border:none;
+    }
+
+    input, select{
+      padding:12px 14px;
+      border:1px solid #ddd;
+      border-radius:10px;
+      font-size:15px;
+    }
+
+    .message{
+      padding:10px;
+      display:none;
+      border-radius:8px;
+      font-size:14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="register-card">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="icon-wrap">
+      <!-- Icons kept as original -->
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <h1>RiseIntern</h1>
+    <h2>Create your account</h2>
+    <p class="subtitle">Register to explore curated internships, AI recommendations, and government schemes.</p>
+
+    <!-- GOOGLE BUTTON -->
+    <div class="social-btns">
+      <button type="button" class="social-btn" id="googleSignUp">
+        <img src="https://www.svgrepo.com/show/355037/google.svg" width="24"> Signup with Google
+      </button>
+    </div>
+
+    <!-- EMAIL SIGNUP -->
+    <form id="regForm">
+      <input id="name" type="text" placeholder="Full name" required>
+      <input id="email" type="email" placeholder="Email address" required>
+      <input id="password" type="password" placeholder="Password (min 6 chars)" minlength="6" required>
+
+      <select id="role" required>
+        <option value="">Select Role</option>
+        <option value="student">Student</option>
+        <option value="recruiter">Recruiter</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <select id="interest" required>
+        <option value="">Select your interest</option>
+        <option>Software Development</option>
+        <option>Data Science</option>
+        <option>Web Development</option>
+        <option>AI / ML</option>
+        <option>Marketing</option>
+        <option>Design</option>
+      </select>
+
+      <button type="submit" class="btn">Register</button>
+
+      <div class="message" id="msgBox"></div>
+
+      <p class="hint">Already have an account? 
+        <a href="login2.html">Login here</a>
+      </p>
+    </form>
+
+  </div>
+</div>
+
+<!-- BACKEND LOGIC -->
+<script>
+
+  /* Firebase Config */
+  const firebaseConfig = {
+    apiKey: "AIzaSyAx3ZwxTYmtmvxfqtOp_LzKUpCTE9cjJyE",
+    authDomain: "rise-intern-47cd2.firebaseapp.com",
+    projectId: "rise-intern-47cd2",
+    storageBucket: "rise-intern-47cd2.firebasestorage.app",
+    messagingSenderId: "481360220760",
+    appId: "1:481360220760:web:9667c81d95355b3a76b02d"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  function showMessage(msg, ok=true){
+    const box=document.getElementById("msgBox");
+    box.style.display="block";
+    box.style.background= ok?"#e7f9f3":"#fff0f0";
+    box.style.color= ok?"#056644":"#b00020";
+    box.textContent=msg;
+  }
+
+  let submitting=false;
+
+  function redirectByRole(role){
+    if(role==="student") window.location="student2.html";
+    else if(role==="recruiter") window.location="recruiter2.html";
+    else if(role==="admin") window.location="admin2.html";
+  }
+
+  /* EMAIL SIGNUP + VERIFICATION */
+  document.getElementById("regForm").addEventListener("submit",async(e)=>{
+    e.preventDefault();
+    if(submitting) return;
+
+    const name=document.getElementById("name").value.trim();
+    const email=document.getElementById("email").value;
+    const pass=document.getElementById("password").value;
+    const role=document.getElementById("role").value;
+    const interest=document.getElementById("interest").value;
+
+    if(!name||!email||!pass||!role||!interest){
+      return showMessage("Please fill all fields.",false);
+    }
+
+    submitting=true;
+    showMessage("Creating account...");
+
+    try{
+      const methods=await auth.fetchSignInMethodsForEmail(email);
+      if(methods.includes("password")){
+        submitting=false;
+        return showMessage("Email already exists. Please login.",false);
+      }
+
+      const cred=await auth.createUserWithEmailAndPassword(email,pass);
+      await cred.user.updateProfile({displayName:name});
+      await db.collection("users").doc(cred.user.uid).set({
+        name,email,role,interest,provider:"password",
+        created:firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await cred.user.sendEmailVerification();
+
+      showMessage("Verification email sent! Check inbox.",true);
+      await auth.signOut();
+      setTimeout(()=>window.location="login2.html",2000);
+
+    }catch(err){
+      showMessage(err.message,false);
+    }
+    submitting=false;
+  });
+
+  /* GOOGLE SIGNUP */
+  document.getElementById("googleSignUp").addEventListener("click",async()=>{
+    if(submitting) return;
+
+    const role=document.getElementById("role").value;
+    const interest=document.getElementById("interest").value;
+
+    if(!role||!interest){
+      return showMessage("Select role & interest before Google signup",false);
+    }
+
+    submitting=true;
+    showMessage("Opening Google...");
+
+    try{
+      const provider=new firebase.auth.GoogleAuthProvider();
+      const result=await auth.signInWithPopup(provider);
+      const user=result.user;
+
+      await db.collection("users").doc(user.uid).set({
+        name:user.displayName,
+        email:user.email,
+        role,interest,
+        provider:"google",
+        photoURL:user.photoURL,
+        created:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+
+      showMessage("Signed in with Google!",true);
+      setTimeout(()=>redirectByRole(role),800);
+
+    }catch(err){
+      showMessage(err.message,false);
+    }
+    submitting=false;
+  });
+
+</script>
+
+</body>
+</html>
