@@ -10,4 +10,4 @@ RiseIntern uses AI-based resume analysis and ATS scoring to match students with 
 Tech Stack:
 Python
 Machine Learning
-Streamlit (optional)
+NLP
